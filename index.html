@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FFC531">
+<title>Bulbula Mulu Wengel Kids Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;700;800&display=swap" rel="stylesheet">
+<script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#FBF1DD; --paper:#FFFDF6; --ink:#3A2A21; --ink2:#8A776A;
+  --yellow:#FFC531; --red:#FF6B6B; --orange:#FF9838; --teal:#2EC4B6;
+  --berry:#F2668B; --grape:#9B6BD1; --green:#58B968; --danger:#E4553F;
+  --line:2.5px solid var(--ink);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;color:var(--ink);font-size:18px;line-height:1.45;
+  font-family:'Baloo 2','Noto Sans Ethiopic',system-ui,sans-serif;
+  background-color:var(--bg);
+  background-image:radial-gradient(rgba(58,42,33,.06) 1.6px,transparent 1.7px);
+  background-size:26px 26px;
+}
+body.am{font-family:'Noto Sans Ethiopic','Baloo 2',system-ui,sans-serif;line-height:1.6}
+button{font-family:inherit;color:var(--ink)}
+svg{vertical-align:middle}
+#app{max-width:560px;margin:0 auto;padding:0 16px 40px;min-height:100svh}
+.screen{animation:rise .28s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ---------- error bar ---------- */
+#errbar{position:fixed;top:0;left:0;right:0;z-index:400;display:none;align-items:center;gap:10px;
+ background:#FAD9D3;border-bottom:2.5px solid var(--ink);padding:10px 14px;font-weight:700;font-size:15px}
+#errbar span{flex:1;min-width:0;word-break:break-word}
+#errbar button{flex:none;width:36px;height:36px;border:2px solid var(--ink);border-radius:10px;
+ background:#fff;font-weight:800;cursor:pointer}
+
+/* ---------- sun mascot ---------- */
+.sun{width:150px;height:150px;display:block;margin:0 auto;animation:bob 4.5s ease-in-out infinite}
+.mini{flex:none}
+.mini .sun{width:58px;height:58px;margin:0;animation-duration:6s}
+.rays{transform-origin:100px 100px;animation:spin 46s linear infinite}
+.eyes{transform-origin:100px 94px;animation:blink 4.4s infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes blink{0%,91%,97%,100%{transform:scaleY(1)}94%{transform:scaleY(.12)}}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:800;
+ font-size:19px;background:var(--paper);border:var(--line);border-radius:16px;padding:14px 20px;
+ box-shadow:0 4px 0 var(--ink);cursor:pointer;touch-action:manipulation;user-select:none;
+ transition:transform .07s,box-shadow .07s}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+.btn svg{width:22px;height:22px}
+.btn.full{width:100%}
+.btn.sm{font-size:16px;padding:9px 14px;border-width:2px;box-shadow:0 3px 0 var(--ink);border-radius:12px}
+.btn.sm svg{width:18px;height:18px}
+.btn-yellow{background:var(--yellow)}
+.btn-green{background:var(--green)}
+.btn-red{background:var(--danger);color:#FFF6E3}
+.iconbtn{width:48px;height:48px;flex:none;display:grid;place-items:center;background:var(--paper);
+ border:var(--line);border-radius:14px;box-shadow:0 3px 0 var(--ink);cursor:pointer;touch-action:manipulation;
+ transition:transform .07s,box-shadow .07s}
+a.iconbtn{text-decoration:none;color:var(--ink)}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.iconbtn svg{width:22px;height:22px}
+.quiet{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:none;
+ border:2px dashed rgba(58,42,33,.4);border-radius:14px;padding:11px;font-weight:800;font-size:16.5px;
+ cursor:pointer;touch-action:manipulation}
+.quiet svg{width:19px;height:19px}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;gap:12px;padding:16px 0 14px}
+.top-t{font-size:24px;font-weight:800;flex:1;min-width:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tcount{font-size:15px;font-weight:800;border:2px solid var(--ink);border-radius:999px;padding:3px 10px;background:#fff;white-space:nowrap}
+
+/* ---------- inputs ---------- */
+.input{width:100%;font-family:inherit;font-size:18px;font-weight:600;color:var(--ink);background:#fff;
+ border:var(--line);border-radius:14px;padding:14px 16px}
+.input:focus{outline:3px solid var(--yellow);outline-offset:1px}
+.input::placeholder{color:#B7A794;font-weight:500}
+.lab{display:block;font-weight:800;font-size:16px;margin:16px 0 6px}
+.pw-wrap{position:relative;margin-bottom:14px}
+.pw-wrap .input{padding-left:46px;padding-right:52px}
+.lock{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:22px;height:22px;color:var(--ink2)}
+.eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;
+ background:none;cursor:pointer;display:grid;place-items:center;color:var(--ink2)}
+.eye svg{width:22px;height:22px}
+
+/* ---------- login / language ---------- */
+.login{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:30px 0}
+.login h1{font-size:29px;font-weight:800;text-align:center;margin:20px 0 10px;line-height:1.2}
+.tagline{text-align:center;font-size:19px;font-weight:800;margin-bottom:10px}
+.amh{text-align:center;font-size:17px;font-weight:600;color:var(--ink2);margin-bottom:26px}
+.hl{background:var(--yellow);padding:1px 9px;border-radius:9px;
+ box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.login-err{display:none;color:var(--danger);font-weight:700;text-align:center;margin:2px 0 12px;font-size:17px}
+.login-err.show{display:block}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.login-foot{text-align:center;color:var(--ink2);font-size:14px;font-weight:600;margin-top:26px}
+.langname{display:inline-block;background:#fff;border:3px solid var(--ink);border-radius:18px;
+ padding:14px 22px;font-size:25px;font-weight:800;line-height:1.2}
+.langbtn{gap:0}
+
+/* ---------- dashboard ---------- */
+.dash-top{display:flex;align-items:center;gap:12px;padding:20px 0 6px}
+.hello{font-size:25px;font-weight:800;line-height:1.1}
+.dash-date{font-size:15.5px;font-weight:600;color:var(--ink2)}
+.dash-top .syncpill{margin-left:auto}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:800;border:2px solid var(--ink);
+ border-radius:999px;padding:5px 11px;background:#fff;white-space:nowrap}
+.pill svg{width:15px;height:15px}
+.pill.ok{background:#D9F2DC}.pill.wait{background:var(--yellow)}.pill.err{background:#FAD9D3}.pill.off{background:#EFE6D6}
+.bday{width:100%;display:flex;align-items:center;gap:14px;background:var(--yellow);border:var(--line);
+ border-radius:18px;padding:14px 16px;box-shadow:0 4px 0 var(--ink);cursor:pointer;text-align:left;
+ font-size:19px;font-weight:800;margin:14px 0 6px;touch-action:manipulation;
+ transition:transform .07s,box-shadow .07s}
+.bday:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+.bday svg{width:26px;height:26px;flex:none}
+.bday .btx{flex:1}
+.bday small{display:block;font-size:14.5px;font-weight:600;color:var(--ink)}
+.soon{background:var(--paper);border:var(--line);border-radius:18px;box-shadow:0 4px 0 var(--ink);margin:14px 0 6px;overflow:hidden}
+.soon-h{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;padding:12px 16px;
+ border-bottom:2px dashed rgba(58,42,33,.25);background:#FFEFBF}
+.soon-h svg{width:19px;height:19px}
+.soon-row{display:flex;align-items:center;gap:12px;padding:11px 16px;font-size:17px}
+.soon-row+.soon-row{border-top:2px dashed rgba(58,42,33,.18)}
+.soon-d{flex:none;width:74px;font-weight:800;font-size:14px;color:var(--ink2)}
+.soon-row b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.soon-m{flex:none;font-weight:700;font-size:14.5px;color:var(--ink2)}
+.soon-extra{font-size:15px;color:var(--ink2);font-weight:700}
+.acts{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+.act{width:100%;display:flex;align-items:center;gap:16px;text-align:left;padding:16px 18px;
+ border:var(--line);border-radius:22px;box-shadow:0 5px 0 var(--ink);cursor:pointer;touch-action:manipulation;
+ transition:transform .07s,box-shadow .07s}
+.act:active{transform:translateY(5px);box-shadow:0 0 0 var(--ink)}
+.act .ico{width:58px;height:58px;flex:none;display:grid;place-items:center;background:#fff;
+ border:2.5px solid var(--ink);border-radius:16px}
+.act .ico svg{width:28px;height:28px}
+.act .tx{flex:1;min-width:0}
+.act .tx b{display:block;font-size:22px;font-weight:800;line-height:1.15}
+.act .tx small{font-size:15.5px;font-weight:600;color:var(--ink2)}
+.act svg.chev{width:26px;height:26px;flex:none;color:var(--ink2)}
+.act.att{background:var(--yellow)}
+.act.kids{background:var(--paper)}
+.act.rec{background:#CFF0EA}
+.dfoot{display:flex;gap:10px;margin-top:14px}
+
+/* ---------- BIG SQUARE class tiles ---------- */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.secbox{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+ aspect-ratio:1/1;min-height:145px;background:var(--c);border:3px solid var(--ink);border-radius:26px;
+ box-shadow:0 7px 0 var(--ink);cursor:pointer;touch-action:manipulation;user-select:none;text-align:center;
+ padding:10px;overflow:hidden;transition:transform .07s,box-shadow .07s}
+.secbox:active{transform:translateY(7px);box-shadow:0 0 0 var(--ink)}
+.secbox .num{width:74px;height:74px;flex:none;display:grid;place-items:center;background:#fff;
+ border:3px solid var(--ink);border-radius:50%;font-size:40px;font-weight:800;line-height:1;
+ transform:rotate(var(--rot,0deg))}
+.secbox .agelab{display:inline-flex;align-items:center;background:#fff;border:2.5px solid var(--ink);
+ border-radius:999px;padding:6px 14px;font-size:20px;font-weight:800;line-height:1.1}
+.secbox .kcount{font-size:15px;font-weight:700;opacity:.75;line-height:1.2}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:8px}
+.dgrid .secbox{min-height:0;border-radius:20px;border-width:2.5px;box-shadow:0 5px 0 var(--ink);gap:5px;padding:8px}
+.dgrid .secbox:active{transform:translateY(5px);box-shadow:0 0 0 var(--ink)}
+.dgrid .secbox .num{width:44px;height:44px;font-size:24px;border-width:2.5px}
+.dgrid .secbox .agelab{font-size:12.5px;padding:3px 9px;border-width:2px}
+.dgrid .secbox .kcount{font-size:12px}
+
+/* ---------- attendance ---------- */
+.att-sub{font-size:16px;font-weight:600;color:var(--ink2);margin:-4px 0 12px}
+.sec-pill{display:inline-flex;border:2.5px solid var(--ink);border-radius:999px;padding:7px 15px;
+ font-weight:800;font-size:17px;box-shadow:0 3px 0 var(--ink)}
+.date-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.date-row input{flex:1}
+.dlab{font-weight:800;font-size:16px}
+.tools{display:flex;gap:10px;margin-bottom:14px}
+.att-list{display:flex;flex-direction:column;gap:11px;padding-bottom:130px}
+.krow{display:flex;align-items:center;gap:12px;background:var(--paper);border:var(--line);border-radius:16px;
+ padding:12px 14px;box-shadow:0 3px 0 var(--ink);user-select:none}
+.krow .kinfo{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.krow .kinfo b{font-size:19.5px;font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.krow .kinfo b svg{width:18px;height:18px;margin-left:5px;color:var(--orange)}
+.krow .kinfo>span{font-size:15px;font-weight:600;color:var(--ink2)}
+.krow.att{cursor:pointer;touch-action:manipulation}
+.krow.att.off{background:#F3EADA}
+.krow.att:not(.off){background:#F1FAEC}
+.stbtn{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:118px;
+ border:2.5px solid var(--ink);border-radius:999px;padding:10px 14px;font-weight:800;font-size:16.5px;white-space:nowrap}
+.stbtn.yes{background:var(--green)}
+.stbtn.no{background:#fff;color:var(--danger)}
+.stbtn svg{width:18px;height:18px}
+.att-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;
+ background:var(--paper);border-top:var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+ display:flex;align-items:center;gap:14px;z-index:60}
+.counts{flex:1;font-size:16px;font-weight:700;color:var(--ink2)}
+.counts b{color:var(--ink);font-size:20px}
+.note{display:flex;gap:9px;align-items:flex-start;background:#FFF0BF;border:2px dashed var(--ink);
+ border-radius:14px;padding:10px 13px;font-size:15.5px;font-weight:600;margin-bottom:12px}
+.note svg{width:19px;height:19px;flex:none;margin-top:1px}
+
+/* ---------- records & charts ---------- */
+.barchart{width:100%;height:auto;display:block}
+.cval{font:700 17px 'Baloo 2','Noto Sans Ethiopic',sans-serif;fill:var(--ink)}
+.clab{font:600 14px 'Baloo 2','Noto Sans Ethiopic',sans-serif;fill:var(--ink2)}
+.chart-h{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;margin-bottom:10px}
+.chart-h svg{width:20px;height:20px;flex:none}
+.secrow2{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.secrow2:last-child{margin-bottom:2px}
+.sbar{flex:1;height:28px;background:#F3EADA;border:2.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.sbar i{display:block;height:100%;min-width:0;background:var(--c);border-right:2.5px solid var(--ink)}
+.cnum{flex:none;width:34px;text-align:right;font-size:19px;font-weight:800}
+.trend{flex:none;width:58px;text-align:right;font-weight:800;font-size:15px}
+.trend.up{color:#2F7D3B}.trend.down{color:var(--danger)}.trend.flat{color:var(--ink2)}
+.rcard{background:var(--paper);border:var(--line);border-radius:18px;box-shadow:0 4px 0 var(--ink);margin-bottom:14px;overflow:hidden}
+.rdate{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#FFEFBF;
+ border-bottom:2px dashed rgba(58,42,33,.25);font-weight:800;font-size:16.5px}
+.rdate svg{width:18px;height:18px;flex:none}
+.rdate .rtot{margin-left:auto;font-size:14.5px;color:var(--ink2);font-weight:700;white-space:nowrap}
+.rrow{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;background:none;border:none;
+ text-align:left;cursor:pointer;font-size:16.5px;touch-action:manipulation}
+.rrow+.rrow{border-top:2px dashed rgba(58,42,33,.18)}
+.rrow:active{background:#FFF7E0}
+.rrow .sc{width:36px;height:36px;flex:none;display:grid;place-items:center;border:2.5px solid var(--ink);
+ border-radius:50%;background:var(--c);font-weight:800;font-size:17px}
+.rrow b{flex:1;min-width:0;font-weight:800}
+.rrow .cnt{flex:none;font-weight:700;color:var(--ink2);font-size:15.5px}
+
+/* ---------- kids list ---------- */
+.search{position:relative;margin-bottom:12px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--ink2)}
+.search .input{padding-left:44px}
+.chips{display:flex;flex-wrap:wrap;gap:9px;padding:2px 0 12px}
+.chip{flex:none;display:inline-flex;align-items:center;gap:7px;border:2px solid var(--ink);border-radius:999px;
+ padding:8px 14px;font-weight:800;font-size:16px;background:var(--paper);box-shadow:0 3px 0 var(--ink);
+ cursor:pointer;touch-action:manipulation;transition:transform .07s,box-shadow .07s}
+.chip:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.chip i.dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--ink);background:var(--c)}
+.chip.on{background:var(--c)}
+.add-row{margin-bottom:14px}
+.klist{display:flex;flex-direction:column;gap:11px;padding-bottom:30px}
+.sec-tag{flex:none;border:2px solid var(--ink);border-radius:10px;padding:5px 9px;font-size:14px;font-weight:800;background:var(--c)}
+.kmeta{font-size:14.5px;font-weight:600;color:var(--ink2)}
+.badge-up{display:inline-flex;align-items:center;gap:5px;background:#D9F2DC;border:2px solid var(--ink);
+ border-radius:999px;padding:2px 9px;font-size:12.5px;font-weight:800;margin-top:3px}
+.badge-up svg{width:13px;height:13px}
+.no-res{display:none;text-align:center;color:var(--ink2);font-weight:700;padding:26px 0}
+
+/* ---------- shared bits ---------- */
+.empty{border:2.5px dashed rgba(58,42,33,.45);border-radius:20px;padding:30px 20px;text-align:center;
+ color:var(--ink2);font-weight:600}
+.empty svg{width:34px;height:34px;margin-bottom:8px}
+.empty b{display:block;font-size:19px;color:var(--ink);margin-bottom:4px}
+.card{background:var(--paper);border:var(--line);border-radius:18px;box-shadow:0 4px 0 var(--ink);padding:16px;margin-bottom:14px}
+h3.sec{font-size:20px;font-weight:800;margin:22px 0 6px}
+.hint{font-size:16px;font-weight:600;color:var(--ink2);margin:6px 0 12px}
+.st-line{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.st-line svg{width:20px;height:20px;flex:none}
+.msg{font-weight:700;font-size:16px;margin-top:12px}
+.msg.ok{color:#2F7D3B}.msg.err{color:var(--danger)}
+details{border:2px dashed rgba(58,42,33,.4);border-radius:14px;padding:12px 14px;margin-top:14px}
+summary{font-weight:800;font-size:16.5px;cursor:pointer}
+details ol{margin:10px 0 2px;padding-left:22px;font-size:15.5px;font-weight:600;color:var(--ink2)}
+details li{margin-bottom:6px}
+.binid{font-size:13.5px;font-weight:600;color:var(--ink2);word-break:break-all;margin-top:10px}
+
+/* ---------- modal / toast / confetti ---------- */
+.overlay{position:fixed;inset:0;background:rgba(58,42,33,.55);z-index:150;display:flex;align-items:flex-end;
+ justify-content:center;opacity:0;transition:opacity .2s}
+.overlay.show{opacity:1}
+.sheet{width:100%;max-width:560px;background:var(--paper);border:var(--line);border-bottom:none;
+ border-radius:26px 26px 0 0;padding:14px 20px calc(22px + env(safe-area-inset-bottom));
+ transform:translateY(40px);transition:transform .22s ease}
+.overlay.show .sheet{transform:none}
+.handle{width:46px;height:5px;border-radius:99px;background:rgba(58,42,33,.25);margin:0 auto 10px}
+.sheet h2{font-size:23px;font-weight:800;margin:6px 0 4px}
+.sheet p{font-size:16.5px;font-weight:600;color:var(--ink2);margin:4px 0 8px}
+.mrow{display:flex;gap:12px;margin-top:20px}
+.mrow .btn{flex:1}
+.mrow.col{flex-direction:column}
+.prev{margin-top:14px}
+.prev-pill{display:inline-flex;align-items:center;gap:8px;border:2.5px solid var(--ink);border-radius:999px;
+ padding:8px 15px;font-weight:800;font-size:16.5px}
+.prev-note{font-size:14.5px;font-weight:600;color:var(--ink2);margin-top:8px}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,80px);
+ display:flex;align-items:center;gap:9px;background:var(--ink);color:#FFF6E3;border-radius:999px;
+ padding:12px 20px;font-weight:800;font-size:16.5px;z-index:200;opacity:0;transition:.25s;max-width:90vw;pointer-events:none}
+#toast.show{transform:translate(-50%,0);opacity:1}
+#toast svg{width:20px;height:20px;flex:none}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:300}
+</style>
+</head>
+<body>
+<div id="errbar"><span></span><button type="button" id="errClose" aria-label="Dismiss">✕</button></div>
+<div id="app"></div>
+<div id="toast"></div>
+<div id="modal-root"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+'use strict';
+/* v7 — attendance sync fix: merge instead of overwrite, chart oldest→newest */
+/* ================= JSONBin — already connected ================= */
+const JSONBIN={
+  binId:'68dbdee5ae596e708f013aad',
+  masterKey:'$2a$10$lX2vPpZr/JoK/l01BQnBWOhPKmVcO8/vC21GpJ5YsvbZD7WPz80Re',
+  accessKey:'$2a$10$qBKrpQEIJZfjtps.QZGO8OimntTEtoGLTo1c0Fd/sGskEvpUqgmPu'
+};
+
+/* ================= translations (English + Amharic) ================= */
+const STRINGS={
+en:{
+ 1:'Bulbula Mulu Wengel Kids Management System',
+ 2:'Syncing…',3:'Saving…',4:'Offline copy',5:'Synced',6:'Synced {time}',
+ 7:'Settings',8:'Log out',9:'Section {n}',10:'Ages {ages}',11:'Empty',
+ 12:'{n} kid',13:'{n} kids',14:'kid',15:'kids',16:'Back',17:'Edit',18:'Delete',
+ 19:'Jan',20:'Feb',21:'Mar',22:'Apr',23:'May',24:'Jun',25:'Jul',26:'Aug',27:'Sep',28:'Oct',29:'Nov',30:'Dec',
+ 31:'Bulbula Mulu Wengel',32:'Kids Management System',33:'Sunday School',
+ 34:'Enter the password',35:'Show password',36:'Enter',
+ 37:'That password is not right — please try again.',38:'Welcome, Teacher!',
+ 39:'For Sunday school teachers · Bulbula Mulu Wengel',
+ 40:'Hello, Teacher!',41:'Happy birthday, {name}!',42:'& more',
+ 43:'Turning {age} today — tap for confetti!',
+ 44:'Birthdays coming up',
+ 45:'turns {age} · today!',46:'turns {age} · tomorrow',47:'turns {age} · in {n} days',
+ 48:'…and {n} more soon',
+ 49:'Take Attendance',50:'Mark who came today',51:'Edit Kids List',
+ 52:'Add, edit or remove kids',53:'Classes',
+ 55:"Choose today's class",56:'— but first add some kids!',
+ 57:'No kids yet',58:'Add kids to the list first, then take attendance.',
+ 59:'Go to Kids List',60:'Section {n} · Ages {ages}',
+ 61:'{n} kid in this class — tap a kid to mark present, then save.',
+ 62:'{n} kids in this class — tap a kid to mark present, then save.',
+ 63:'Date',
+ 64:'Attendance for this date was already saved — your changes will update it.',
+ 65:'Mark all present',66:'Clear',67:'This class is empty',68:'No kids of this age yet.',
+ 69:'Add kids',70:'Present',71:'Absent',72:'present',73:'absent',74:'Save',
+ 75:'Attendance saved. Thank you, Teacher!',
+ 76:'Saved on this phone — could not reach JSONBin',
+ 77:'Saved for this date — you can keep editing.',
+ 78:'Kids List',79:'{n} total',80:'Search a name…',81:'All',82:'Add a Kid',
+ 83:'The list is empty',84:'Start by adding your first kid.',85:'Add your first kid',
+ 86:'or load {n} sample kids',87:'No kids in Section {n} yet',
+ 88:'Kids appear here automatically by age.',
+ 89:'No kid with that name here.',
+ 90:'Classes are set automatically — when a kid gets older, they move up on their birthday.',
+ 91:'Age {n} · born {date} {year}',
+ 92:'Gender: {gender}',93:'Phone: {phone}',94:'Moved up',95:'Call parent',
+ 96:'Load {n} sample kids',
+ 97:'Edit kid',98:'Add a kid',99:'Full name',100:'e.g. Selam Alemu',
+ 101:'Gender',102:'Not set',103:'Male',104:'Female',105:'Birthday',
+ 106:'Parent phone (optional)',107:'e.g. 0989233012',
+ 108:'Pick a birthday — the class is chosen for you.',
+ 109:'Age {age} → Section {sec}',
+ 110:'Under 4 — joins Section 1 until old enough.',
+ 111:'Cancel',112:'Save changes',113:'Add kid',
+ 114:"Please write the kid's name",115:'Please pick the birthday',
+ 116:'Kid saved!',117:'Saved on this phone (JSONBin unreachable)',
+ 118:'Remove {name}?',
+ 119:'This removes the kid from the list. Old attendance stays in the records.',
+ 120:'Keep',121:'Remove',122:'Kid removed',
+ 123:'Connecting to your ministry bin…',
+ 124:'No internet right now — using the copy saved on this phone. It will sync automatically once the internet is back.',
+ 125:'Connected! Everything you save is shared with all teachers — last sync {time}.',
+ 126:'Church database (JSONBin)',
+ 127:'The app is already connected — no setup needed. Every kid you add and every attendance you save is uploaded automatically for all teachers.',
+ 128:'Pull the latest list now',129:'Bin ID: {id}',
+ 130:'How syncing works',
+ 131:'Open the app with internet — it pulls the newest kid list by itself.',
+ 132:"When you add a kid or save attendance, it's uploaded right away.",
+ 133:'No internet? The app uses the copy on this phone and syncs later.',
+ 134:'Practice list',
+ 135:'Sample kids for trying the system out — remove them before real use.',
+ 136:'Remove sample kids',
+ 137:'Loaded {n} kids from JSONBin',
+ 138:'The bin is empty — the list on this phone was kept',
+ 139:'No sample kids found',140:'Sample kids removed',
+ 141:'Added {n} sample kids',142:'Sample kids added (saved on this phone)',
+ 143:'Oops — something went wrong',144:'Unknown error',145:'Try again',
+ 146:'Note:',147:'something unexpected happened',
+ 148:'Timed out — check the internet connection.',
+ 149:'The key was rejected by JSONBin.',
+ 150:'The bin was not found — check the Bin ID.',
+ 151:'Could not reach JSONBin — check the internet or try again.',
+ 152:'Attendance Records',153:'See who came each Sunday',
+ 154:'Sundays at a glance',155:'By section · {date}',
+ 156:'No attendance saved yet',157:'Take attendance and it will appear here.',
+ 158:'Take attendance',159:'History',160:'{n} present',
+ 161:'Tap a class to open that day'
+},
+am:{
+ 1:'ቡልቡላ ሙሉ ወንጌል የልጆች አስተዳደር ስርዓት',
+ 2:'በማመሳሰል ላይ…',3:'በማስቀመጥ ላይ…',4:'ከመስመር ውጭ ያለ ቅጂ',5:'ተመሳስሏል',6:'በ{time} ተመሳስሏል',
+ 7:'ቅንብሮች',8:'ውጣ',9:'ክፍል {n}',10:'እድሜ {ages}',11:'ባዶ',
+ 12:'{n} ልጅ',13:'{n} ልጆች',14:'ልጅ',15:'ልጆች',16:'ተመለስ',17:'አርትዕ',18:'ሰርዝ',
+ 19:'ጥር',20:'የካቲት',21:'መጋቢት',22:'ሚያዝያ',23:'ግንቦት',24:'ሰኔ',25:'ሐምሌ',26:'ነሐሴ',27:'መስከረም',28:'ጥቅምት',29:'ኅዳር',30:'ታህሳስ',
+ 31:'ቡልቡላ ሙሉ ወንጌል',32:'የልጆች አስተዳደር ስርዓት',33:'ሰንበት ትምህርት ቤት',
+ 34:'የይለፍ ቃል ያስገቡ',35:'የይለፍ ቃሉን አሳይ',36:'ግባ',
+ 37:'የይለፍ ቃሉ ትክክለኛ አይደለም — እባክዎ እንደገና ይሞክሩ።',38:'እንኳን ደህና መጡ፣ መምህር!',
+ 39:'ለሰንበት ትምህርት መምህራን · ቡልቡላ ሙሉ ወንጌል',
+ 40:'ሰላም፣ መምህር!',41:'መልካም የልደት ቀን፣ {name}!',42:'እና ሌሎችም',
+ 43:'ዛሬ {age} ዓመት ሞላ/ች — ለኮንፌቲ ይንኩ!',
+ 44:'የሚመጡ የልደት ቀናት',
+ 45:'{age} ዓመት ይሞላ/ለች · ዛሬ!',46:'{age} ዓመት ይሞላ/ለች · ነገ',47:'{age} ዓመት ይሞላ/ለች · በ{n} ቀናት',
+ 48:'…እና ሌሎች {n} በቅርቡ',
+ 49:'መገኘት ማረጋገጥ',50:'ዛሬ የመጡትን ምልክት ያድርጉ',51:'የልጆችን ዝርዝር አርትዕ',
+ 52:'ልጆችን ይጨምሩ፣ ያርትዑ ወይም ያስወግዱ',53:'ክፍሎች',
+ 55:'የዛሬውን ክፍል ይምረጡ',56:'— ነገር ግን መጀመሪያ ጥቂት ልጆችን ይጨምሩ!',
+ 57:'ገና ምንም ልጆች የሉም',58:'መጀመሪያ ልጆችን ወደ ዝርዝሩ ይጨምሩ፣ ከዚያ መገኘት ያረጋግጡ።',
+ 59:'ወደ ልጆች ዝርዝር ይሂዱ',60:'ክፍል {n} · እድሜ {ages}',
+ 61:'በዚህ ክፍል ውስጥ {n} ልጅ አለ — ልጁን ነክተው መጥቷቸውን ያረጋግጡ፣ ከዚያ ያስቀምጡ።',
+ 62:'በዚህ ክፍል ውስጥ {n} ልጆች አሉ — ልጆቹን ነክተው መጥቷቸውን ያረጋግጡ፣ ከዚያ ያስቀምጡ።',
+ 63:'ቀን',
+ 64:'ለዚህ ቀን የተደረገው የመገኘት ማረጋገጫ ቀድሞውኑ ተቀምጧል — ለውጦችዎ ይህንን ያዘምኑታል።',
+ 65:'ሁሉም መጥተዋል ተብሎ ይምልከት',66:'አጽዳ',67:'ይህ ክፍል ባዶ ነው',68:'ገና በዚህ እድሜ ምንም ልጆች የሉም።',
+ 69:'ልጆችን ጨምር',70:'መጥቷል',71:'አልመጣም',72:'መጥተዋል',73:'አልመጡም',74:'አስቀምጥ',
+ 75:'የመገኘት ማረጋገጫው ተቀምጧል። አመሰግናለሁ፣ መምህር!',
+ 76:'በዚህ ስልክ ላይ ተቀምጧል — JSONBinን ማግኘት አልተቻለም',
+ 77:'ለዚህ ቀን ተቀምጧል — ማርትዓትዎን መቀጠል ይችላሉ።',
+ 78:'የልጆች ዝርዝር',79:'በአጠቃላይ {n}',80:'ስም ይፈልጉ…',81:'ሁሉም',82:'ልጅ ጨምር',
+ 83:'ዝርዝሩ ባዶ ነው',84:'የመጀመሪያውን ልጅ በመጨመር ይጀምሩ።',85:'የመጀመሪያውን ልጅዎን ይጨምሩ',
+ 86:'ወይም {n} ናሙና ልጆችን ይጫኑ',87:'ገና በክፍል {n} ውስጥ ምንም ልጆች የሉም',
+ 88:'ልጆች በእድሜያቸው መሰረት እዚህ በራሳቸው ይታያሉ።',
+ 89:'በዚህ ስም ምንም ልጅ የለም።',
+ 90:'ክፍሎች በራሳቸው ይወሰናሉ — አንድ ልጅ ሲያድግ፣ በልደት ቀኑ ወደ ቀጣይ ክፍል ይሸጋገራል።',
+ 91:'እድሜ {n} · የተወለደው {date} {year}',
+ 92:'ፆታ፡ {gender}',93:'ስልክ፡ {phone}',94:'ወደ ቀጣይ ክፍል ሸጋግሯል',95:'ወላጅን ይደውሉ',
+ 96:'{n} ናሙና ልጆችን ይጫኑ',
+ 97:'ልጅ አርትዕ',98:'ልጅ ጨምር',99:'ሙሉ ስም',100:'ለምሳሌ ሰላም አለሙ',
+ 101:'ፆታ',102:'አልተመረጠም',103:'ወንድ',104:'ሴት',105:'የልደት ቀን',
+ 106:'የወላጅ ስልክ (አማራጭ)',107:'ለምሳሌ 0989233012',
+ 108:'የልደት ቀን ይምረጡ — ክፍሉ በራሱ ይመረጥልዎታል።',
+ 109:'እድሜ {age} → ክፍል {sec}',
+ 110:'ከ4 ዓመት በታች — በቂ እድሜ እስኪሞላው ድረስ ክፍል 1 ይገባል።',
+ 111:'ሰርዝ',112:'ለውጦችን አስቀምጥ',113:'ልጅ ጨምር',
+ 114:'እባክዎ የልጁን ስም ይጻፉ',115:'እባክዎ የልደት ቀኑን ይምረጡ',
+ 116:'ልጁ ተቀምጧል!',117:'በዚህ ስልክ ላይ ተቀምጧል (JSONBin ሊገኝ አልቻለም)',
+ 118:'{name}ን ያስወግዱ?',
+ 119:'ይህ ልጁን ከዝርዝሩ ያስወግደዋል። የቀድሞው የመገኘት ማረጋገጫ በመዝገቡ ውስጥ ይቀራል።',
+ 120:'አቆይ',121:'አስወግድ',122:'ልጁ ተወግዷል',
+ 123:'ከአገልግሎት ቢንዎ ጋር በመገናኘት ላይ…',
+ 124:'አሁን ኢንተርኔት የለም — በዚህ ስልክ ላይ የተቀመጠውን ቅጂ በመጠቀም ላይ። ኢንተርኔት ሲመለስ በራሱ ይመሳሰላል።',
+ 125:'ተገናኝቷል! የሚያስቀምጡቤ ሁሉ ከሁሉም መምህራን ጋር ይጋራል — የመጨረሻው ማመሳሰል {time}።',
+ 126:'የቤተክርስቲያን መረጃ ማከማቻ (JSONBin)',
+ 127:'መተግበሪያው ቀድሞውኑ ተገናኝቷል — ምንም ቅንብር አያስፈልግም። የሚጨምሩት እያንዳንዱ ልጅ እና የሚያስቀምጡት እያንዳንዱ የመገኘት ማረጋገጫ ለሁሉም መምህራን በራሱ ይጫናል።',
+ 128:'አሁን የቅርብ ጊዜውን ዝርዝር ያግኙ',129:'የቢን መለያ፡ {id}',
+ 130:'ማመሳሰል እንዴት እንደሚሰራ',
+ 131:'መተግበሪያውን ከኢንተርኔት ጋር ይክፈቱ — በራሱ የቅርብ ጊዜውን የልጆች ዝርዝር ያገኛል።',
+ 132:'ልጅ ሲጨምሩ ወይም መገኘት ሲያረጋግጡ፣ ወዲያውኑ ይጫናል።',
+ 133:'ኢንተርኔት የለም? መተግበሪያው በዚህ ስልክ ላይ ያለውን ቅጂ ይጠቀማል እና በኋላ ይመሳሰላል።',
+ 134:'የሙከራ ዝርዝር',
+ 135:'ስርዓቱን ለመሞከር የሚረዱ ናሙና ልጆች — ከእውነተኛ አጠቃቀም በፊት ያስወግዷቸው።',
+ 136:'ናሙና ልጆችን አስወግድ',
+ 137:'{n} ልጆች ከJSONBin ተጭነዋል',
+ 138:'ቢኑ ባዶ ነው — በዚህ ስልክ ላይ ያለው ዝርዝር ተቀምጧል',
+ 139:'ምንም ናሙና ልጆች አልተገኙም',140:'ናሙና ልጆች ተወግደዋል',
+ 141:'{n} ናሙና ልጆች ተጨምረዋል',142:'ናሙና ልጆች ተጨምረዋል (በዚህ ስልክ ላይ ተቀምጠዋል)',
+ 143:'ይቅርታ — አንዳንድ ችግር ተፈጥሯል',144:'ያልታወቀ ስህተት',145:'እንደገና ይሞክሩ',
+ 146:'ማሳሰቢያ፡',147:'ያልተጠበቀ ነገር ተፈጥሯል',
+ 148:'ጊዜው አልፏል — የኢንተርኔት ግንኙነቱን ይፈትሹ።',
+ 149:'መክፈቻው በJSONBin ተቀባይነት አላገኘም።',
+ 150:'ቢኑ አልተገኘም — የቢን መለያውን ይፈትሹ።',
+ 151:'JSONBinን ማግኘት አልተቻለም — ኢንተርኔቱን ይፈትሹ ወይም እንደገና ይሞክሩ።'
+}};
+
+/* ================= constants & state ================= */
+const SECTIONS=[
+  {n:1,ages:'4–6',  hex:'#FF6B6B'},
+  {n:2,ages:'7–8',  hex:'#FF9838'},
+  {n:3,ages:'9–10', hex:'#FFC531'},
+  {n:4,ages:'11–12',hex:'#2EC4B6'},
+  {n:5,ages:'13',   hex:'#F2668B'},
+  {n:6,ages:'14+',  hex:'#9B6BD1'},
+];
+const MONTHS={
+  en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  am:['ጥር','የካቲት','መጋቢት','ሚያዝያ','ግንቦት','ሰኔ','ሐምሌ','ነሐሴ','መስከረም','ጥቅምት','ኅዳር','ታህሳስ']};
+const WEEKDAYS={
+  en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  am:['እሑድ','ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','ዓርብ','ቅዳሜ']};
+const LS_DATA='bmw_data_v1';
+const SAMPLE=[
+  ['Abel Bekele',5,3],['Hiwot Tesfaye',4,40],['Nathan Girma',6,0],
+  ['Selam Alemu',8,12],['Dawit Mengistu',7,90],['Liya Habte',7,25],
+  ['Yonas Kebede',9,3],['Betelhem Tadesse',10,60],['Samuel Assefa',9,150],
+  ['Mahlet Bogale',11,8],['Kirubel Worku',12,200],['Rahel Getachew',11,45],
+  ['Mikias Haile',13,20],['Tigist Fikru',13,100],
+  ['Yared Tessema',14,5],['Bereket Solomon',15,30],['Eden Mulugeta',16,75],
+];
+let state={children:[],attendance:{}};
+let lang='en';
+let sync='none', lastSync=null;
+let route={screen:'login',params:{}};
+let attState=null, kidsQ='', bdayFired='', toastTimer=null;
+
+const SUN=`<svg class="sun" viewBox="0 0 200 200" aria-hidden="true">
+ <g class="rays" stroke="#3A2A21" stroke-width="9" stroke-linecap="round">
+  <line x1="174" y1="100" x2="191" y2="100"/><line x1="152.3" y1="152.3" x2="163.6" y2="163.6"/>
+  <line x1="100" y1="174" x2="100" y2="191"/><line x1="47.7" y1="152.3" x2="36.4" y2="163.6"/>
+  <line x1="26" y1="100" x2="9" y2="100"/><line x1="47.7" y1="47.7" x2="36.4" y2="36.4"/>
+  <line x1="100" y1="26" x2="100" y2="9"/><line x1="152.3" y1="47.7" x2="163.6" y2="36.4"/>
+ </g>
+ <circle cx="100" cy="100" r="57" fill="#FFC531" stroke="#3A2A21" stroke-width="6"/>
+ <g class="eyes" fill="#3A2A21"><circle cx="83" cy="94" r="6.5"/><circle cx="117" cy="94" r="6.5"/></g>
+ <path d="M83 113 Q100 128 117 113" fill="none" stroke="#3A2A21" stroke-width="6" stroke-linecap="round"/>
+ <circle cx="71" cy="107" r="7" fill="#FF6B6B" opacity=".5"/><circle cx="129" cy="107" r="7" fill="#FF6B6B" opacity=".5"/>
+</svg>`;
+
+/* ================= helpers ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const icons=()=>{try{if(window.lucide&&typeof lucide.createIcons==='function')lucide.createIcons();}catch(e){}};
+document.addEventListener('DOMContentLoaded',icons);
+window.addEventListener('load',icons);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>'k'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const byName=(a,b)=>a.name.localeCompare(b.name);
+const p2=n=>String(n).padStart(2,'0');
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());};
+const fmtTime=d=>d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+function t(id,vars){
+  const table=STRINGS[lang]||STRINGS.en;
+  let s=(table[id]!=null)?table[id]:(STRINGS.en[id]!=null?STRINGS.en[id]:'');
+  if(vars)for(const k in vars)s=s.split('{'+k+'}').join(String(vars[k]));
+  return s;}
+function setLang(l){
+  lang=(l==='am')?'am':'en';
+  ssSet('bmw_lang',lang);
+  document.documentElement.lang=lang;
+  document.body.classList.toggle('am',lang==='am');
+  document.title=t(1);}
+function genderLabel(g){
+  if(g==='male')return t(103);
+  if(g==='female')return t(104);
+  return g||'';}
+const fmtD=iso=>{if(typeof iso!=='string')return '?';const p=iso.split('-');
+  return (MONTHS[lang][+p[1]-1]||'?')+' '+(+p[2]||'?');};
+function fmtLong(d){return WEEKDAYS[lang][d.getDay()]+', '+MONTHS[lang][d.getMonth()]+' '+d.getDate();}
+
+function ageOn(date,iso){
+  if(typeof iso!=='string')return 0;
+  const p=iso.split('-');if(p.length<3)return 0;
+  const y=+p[0],m=+p[1],d=+p[2];
+  if(!y||!m||!d)return 0;
+  let a=date.getFullYear()-y;const mm=date.getMonth()+1-m;
+  if(mm<0||(mm===0&&date.getDate()<d))a--;
+  return Math.max(a,0);}
+const calcAge=iso=>ageOn(new Date(),iso);
+function sectionForAge(a){return a<7?1:a<9?2:a<11?3:a<13?4:a===13?5:6;}
+function kidsIn(n){return state.children.filter(k=>sectionForAge(calcAge(k.birthday))===n).sort(byName);}
+function nextBday(iso){const t=new Date();t.setHours(0,0,0,0);
+  if(typeof iso!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(iso))return new Date(t.getFullYear()+50,0,1);
+  const p=iso.split('-');
+  let nb=new Date(t.getFullYear(),+p[1]-1,+p[2]);
+  if(isNaN(nb.getTime()))return new Date(t.getFullYear()+50,0,1);
+  if(nb<t)nb=new Date(t.getFullYear()+1,+p[1]-1,+p[2]);return nb;}
+function isBdayToday(k){const t=new Date();t.setHours(0,0,0,0);return nextBday(k.birthday).getTime()===t.getTime();}
+function upcoming(days){const t=new Date();t.setHours(0,0,0,0);
+  return state.children.map(k=>{const nb=nextBday(k.birthday);
+    const du=Math.round((nb-t)/864e5);
+    return{k,du:isFinite(du)?du:9999,turning:ageOn(nb,k.birthday)};
+  }).filter(x=>x.du<=days).sort((a,b)=>a.du-b.du);}
+function recentlyMoved(k){const past=new Date(Date.now()-45*864e5);
+  return sectionForAge(calcAge(k.birthday))!==sectionForAge(ageOn(past,k.birthday));}
+function sampleBirthday(age,off){const t=new Date();
+  const nb=new Date(t.getFullYear(),t.getMonth(),t.getDate()+off);
+  return (nb.getFullYear()-age)+'-'+p2(nb.getMonth()+1)+'-'+p2(nb.getDate());}
+
+/* ---- attendance-record helpers ---- */
+function parseDS(ds){const p=ds.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function dateKeyOf(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+function lastSundays(n){
+  const out=[];const now=new Date();now.setHours(0,0,0,0);
+  const s=new Date(now);s.setDate(now.getDate()-now.getDay());
+  for(let i=0;i<n;i++){const d=new Date(s);d.setDate(s.getDate()-7*i);out.push(d);}
+  return out;}
+function attForDate(ds){
+  const per={};SECTIONS.forEach(s=>per[s.n]=0);
+  let total=0,has=false;
+  for(const k in state.attendance){
+    const i=k.indexOf('|');if(i<1)continue;
+    const d=k.slice(0,i),sec=+k.slice(i+1);
+    if(d!==ds||!Object.prototype.hasOwnProperty.call(per,sec))continue;
+    has=true;
+    const p=state.attendance[k]&&state.attendance[k].present;
+    const c=Array.isArray(p)?p.length:0;
+    per[sec]=c;total+=c;}
+  return{per,total,has};}
+function allRecordDates(){
+  const seen={};
+  for(const k in state.attendance)seen[k.slice(0,k.indexOf('|'))]=1;
+  return Object.keys(seen).sort().reverse();}
+
+/* ---- MERGE helpers: never lose data when phone and cloud disagree ---- */
+function attTime(rec){return rec&&typeof rec.savedAt==='string'?rec.savedAt:'';}
+function mergeAttendance(local,remote){
+  const out=Object.assign({},local||{});
+  const rem=remote||{};
+  for(const k in rem){
+    const l=out[k],r=rem[k];
+    if(!l){out[k]=r;continue;}
+    if(!r)continue;
+    out[k]=(attTime(r)>attTime(l))?r:l;}
+  return out;}
+function mergeChildren(local,remote){
+  const map={};
+  (remote||[]).forEach(k=>{if(k&&k.id)map[k.id]=k;});
+  (local||[]).forEach(k=>{if(k&&k.id&&!map[k.id])map[k.id]=k;});
+  return Object.values(map).sort(byName);}
+
+function sanitizeKids(arr){
+  const out=[];
+  (arr||[]).forEach(k=>{
+    if(k&&typeof k.name==='string'&&k.name.trim()&&
+       typeof k.birthday==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(k.birthday)){
+      out.push({id:(typeof k.id==='string'&&k.id)?k.id:uid(),
+        name:k.name.trim().slice(0,60),birthday:k.birthday,
+        gender:(typeof k.gender==='string'&&k.gender)?k.gender:'',
+        phone:(typeof k.phone==='string'&&k.phone)?k.phone:'',
+        sample:!!k.sample});
+    }});
+  return out;}
+
+/* ================= safe storage (never throws) ================= */
+function lsGet(k){try{return window.localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{window.localStorage.setItem(k,v);}catch(e){}}
+function ssGet(k){try{return window.sessionStorage.getItem(k);}catch(e){return null;}}
+function ssSet(k,v){try{window.sessionStorage.setItem(k,v);}catch(e){}}
+function ssDel(k){try{window.sessionStorage.removeItem(k);}catch(e){}}
+
+/* ================= persistence (localStorage + JSONBin) ================= */
+function cacheState(){lsSet(LS_DATA,JSON.stringify(state));}
+function fetchT(url,opts,ms){
+  ms=ms||9000;
+  if(typeof AbortController==='function'){
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),ms);
+    return fetch(url,Object.assign({},opts,{signal:ctl.signal})).finally(()=>clearTimeout(t));}
+  return new Promise((resolve,reject)=>{
+    const t=setTimeout(()=>{const e=new Error('Timed out');e.name='AbortError';reject(e);},ms);
+    fetch(url,opts).then(v=>{clearTimeout(t);resolve(v);},er=>{clearTimeout(t);reject(er);});});}
+function httpErr(s){const e=new Error('HTTP '+s);e.status=s;return e;}
+async function getBin(){
+  const r=await fetchT('https://api.jsonbin.io/v3/b/'+JSONBIN.binId+'/latest',
+    {headers:{'X-Master-Key':JSONBIN.masterKey,'X-Bin-Meta':'false'}});
+  if(!r.ok)throw httpErr(r.status);return r.json();}
+async function putBin(){
+  const r=await fetchT('https://api.jsonbin.io/v3/b/'+JSONBIN.binId,{method:'PUT',
+    headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN.masterKey,'X-Bin-Versioning':'false'},
+    body:JSON.stringify({children:state.children,attendance:state.attendance})});
+  if(!r.ok)throw httpErr(r.status);}
+/* Save = read cloud → merge → write merged blob. Nothing can be erased by a save. */
+async function persist(){
+  cacheState();
+  sync='saving';updateSyncPills();
+  try{
+    let remoteKids=[],remoteAtt={};
+    try{
+      const rec=await getBin();
+      remoteKids=sanitizeKids(rec&&rec.children);
+      remoteAtt=(rec&&rec.attendance&&typeof rec.attendance==='object')?rec.attendance:{};
+    }catch(e){/* offline: still upload what we have */}
+    state={children:mergeChildren(state.children,remoteKids),
+           attendance:mergeAttendance(state.attendance,remoteAtt)};
+    cacheState();
+    await putBin();
+    sync='saved';lastSync=fmtTime(new Date());updateSyncPills();return 'ok';
+  }catch(e){sync='error';updateSyncPills();return 'err';}}
+function pillHTML(){
+  if(sync==='loading')return '<span class="pill wait"><i data-lucide="refresh-cw"></i>'+t(2)+'</span>';
+  if(sync==='saving')return '<span class="pill wait"><i data-lucide="cloud"></i>'+t(3)+'</span>';
+  if(sync==='error')return '<span class="pill err"><i data-lucide="wifi-off"></i>'+t(4)+'</span>';
+  return '<span class="pill ok"><i data-lucide="cloud"></i>'+(lastSync?t(6,{time:lastSync}):t(5))+'</span>';}
+function updateSyncPills(){$$('.syncpill').forEach(el=>el.innerHTML=pillHTML());icons();}
+
+/* ================= toast / modal / confetti / errors ================= */
+function toast(msg,ic='check'){
+  const t=$('#toast');
+  t.innerHTML='<i data-lucide="'+ic+'"></i><span>'+msg+'</span>';
+  icons();t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);}
+function openModal(html){
+  const root=$('#modal-root');
+  root.innerHTML='<div class="overlay"><div class="sheet"><div class="handle"></div>'+html+'</div></div>';
+  const ov=root.querySelector('.overlay');
+  requestAnimationFrame(()=>ov.classList.add('show'));
+  ov.addEventListener('click',e=>{if(e.target===ov)closeModal();});
+  icons();return ov;}
+function closeModal(){
+  const ov=$('#modal-root .overlay');if(!ov)return;
+  ov.classList.remove('show');setTimeout(()=>$('#modal-root').innerHTML='',200);}
+function confetti(){
+  const cv=$('#confetti'),dpr=Math.min(devicePixelRatio||1,2);
+  cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  const colors=['#FF6B6B','#FF9838','#FFC531','#2EC4B6','#F2668B','#9B6BD1','#3A2A21'];
+  const parts=Array.from({length:130},()=>({
+    x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.25,
+    w:5+Math.random()*6,h:8+Math.random()*8,c:colors[(Math.random()*colors.length)|0],
+    vy:170+Math.random()*170,vx:-40+Math.random()*80,
+    a:Math.random()*Math.PI,va:-3+Math.random()*6,round:Math.random()<.4}));
+  const t0=performance.now();
+  (function frame(t){
+    const dt=Math.min((t-t0)/1000,.03);
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    let alive=false;
+    parts.forEach(p=>{
+      p.y+=p.vy*dt;p.x+=p.vx*dt;p.a+=p.va*dt;
+      if(p.y<innerHeight+30)alive=true;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.fillStyle=p.c;
+      if(p.round){ctx.beginPath();ctx.arc(0,0,p.w*.6,0,7);ctx.fill();}
+      else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();});
+    if(alive&&t-t0<3000)requestAnimationFrame(frame);
+    else ctx.clearRect(0,0,innerWidth,innerHeight);
+  })(t0);}
+
+let fatalShown=false;
+function showFatal(msg){
+  if(fatalShown)return;fatalShown=true;
+  $('#app').innerHTML='<div class="screen login" style="justify-content:center;text-align:center">'+SUN+
+    '<h1 style="font-size:26px">'+t(143)+'</h1>'+
+    '<div class="amh" style="word-break:break-word">'+esc(String(msg==null||msg===''?t(144):msg).slice(0,160))+'</div>'+
+    '<div><button class="btn btn-yellow" id="retryBtn"><i data-lucide="rotate-ccw"></i>'+t(145)+'</button></div></div>';
+  icons();
+  const rb=$('#retryBtn');
+  if(rb)rb.onclick=()=>{fatalShown=false;boot();};}
+function showErrorBanner(msg){
+  const bar=$('#errbar');if(!bar)return;
+  bar.style.display='flex';
+  bar.querySelector('span').textContent=t(146)+' '+String(msg==null||msg===''?t(147):msg).slice(0,140);}
+(function(){const eb=$('#errbar'),ec=$('#errClose');
+  if(eb&&ec)ec.onclick=()=>{eb.style.display='none';};})();
+window.addEventListener('error',e=>showErrorBanner(e&&e.message));
+window.addEventListener('unhandledrejection',e=>{
+  const r=e&&e.reason;showErrorBanner(r&&(r.message||r));});
+
+/* ================= router ================= */
+function go(name,params={}){
+  route={screen:name,params};
+  if(name!=='attendance')attState=null;
+  try{window.scrollTo(0,0);}catch(e){}
+  try{screens[name]();}
+  catch(e){if(window.console&&console.error)console.error(e);showFatal(e&&(e.message||e));}}
+function topBar(title,back){
+  return '<header class="top"><button class="iconbtn" data-back="'+back+'" aria-label="'+t(16)+'"><i data-lucide="arrow-left"></i></button><div class="top-t">'+title+'</div></header>';}
+function wireBack(){$$('[data-back]').forEach(b=>b.onclick=()=>go(b.dataset.back));}
+function refreshSafeScreens(){
+  if(route.screen==='dashboard'||route.screen==='sections'||route.screen==='kids'||route.screen==='records'){
+    try{screens[route.screen]();}catch(e){}}
+  if(route.screen==='settings')updateSettingsStatus();}
+
+/* ================= screens ================= */
+function screenLogin(){
+  const app=$('#app');
+  app.innerHTML=`
+  <div class="screen login">
+    ${SUN}
+    <h1>${t(31)}</h1>
+    <div class="tagline"><span class="hl">${t(32)}</span></div>
+    <div class="amh">${t(33)}</div>
+    <form id="loginForm" novalidate>
+      <div class="pw-wrap">
+        <i data-lucide="lock" class="lock"></i>
+        <input class="input" id="pw" type="password" placeholder="${t(34)}" autocomplete="current-password">
+        <button type="button" class="eye" id="pwEye" aria-label="${t(35)}"><i data-lucide="eye"></i></button>
+      </div>
+      <div class="login-err" id="loginErr">${t(37)}</div>
+      <button class="btn btn-yellow full" type="submit"><i data-lucide="log-in"></i>${t(36)}</button>
+    </form>
+    <div class="login-foot">${t(39)}</div>
+  </div>`;
+  icons();
+  const pw=$('#pw');try{pw.focus();}catch(e){}
+  $('#pwEye').onclick=()=>{const hide=pw.type==='password';
+    pw.type=hide?'text':'password';
+    $('#pwEye').innerHTML='<i data-lucide="'+(hide?'eye-off':'eye')+'"></i>';icons();pw.focus();};
+  $('#loginForm').onsubmit=e=>{
+    e.preventDefault();
+    if(pw.value.trim().toLowerCase()==='ministry'){
+      ssSet('bmw_auth','1');
+      const saved=ssGet('bmw_lang');
+      if(saved){setLang(saved);toast(t(38));go('dashboard');}
+      else go('langpick');
+    }else{
+      $('#loginErr').classList.add('show');
+      const f=$('#loginForm');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake');
+      pw.select();
+    }};
+}
+
+function screenLang(){
+  const app=$('#app');
+  app.innerHTML=`
+  <div class="screen login">
+    ${SUN}
+    <h1>ቋንቋ ይምረጡ</h1>
+    <div class="tagline">Choose your language</div>
+    <div class="sec-grid" style="margin-top:26px">
+      <button class="secbox langbtn" style="--c:var(--yellow)" id="pickEn">
+        <span class="langname">English</span></button>
+      <button class="secbox langbtn" style="--c:var(--teal)" id="pickAm">
+        <span class="langname">አማርኛ</span></button>
+    </div>
+  </div>`;
+  icons();
+  $('#pickEn').onclick=()=>{setLang('en');toast(t(38));go('dashboard');};
+  $('#pickAm').onclick=()=>{setLang('am');toast(t(38));go('dashboard');};
+}
+
+function screenDashboard(){
+  const app=$('#app'),d=new Date();
+  const soon=upcoming(30);
+  const todays=soon.filter(x=>x.du===0);
+  const soonList=soon.filter(x=>x.du>0).slice(0,4);
+  const extra=soon.length-todays.length-soonList.length;
+  const banner=todays.length?
+    '<button class="bday" id="bdayB"><i data-lucide="party-popper"></i><span class="btx">'+
+    t(41,{name:todays.slice(0,3).map(x=>esc(x.k.name.split(' ')[0])).join(' & ')})+
+    (todays.length>3?' '+t(42):'')+
+    '<small>'+t(43,{age:todays.slice(0,3).map(x=>x.turning).join(', ')})+'</small></span></button>':'';
+  const soonCard=soonList.length?
+    '<div class="soon"><div class="soon-h"><i data-lucide="cake"></i>'+t(44)+'</div>'+
+    soonList.map(x=>'<div class="soon-row"><span class="soon-d">'+fmtD(x.k.birthday)+'</span><b>'+esc(x.k.name)+
+      '</b><span class="soon-m">'+(x.du===0?t(45,{age:x.turning}):x.du===1?t(46,{age:x.turning}):t(47,{age:x.turning,n:x.du}))+'</span></div>').join('')+
+    (extra>0?'<div class="soon-row soon-extra">'+t(48,{n:extra})+'</div>':'')+'</div>':'';
+  app.innerHTML=`
+  <div class="screen">
+    <div class="dash-top">
+      <div class="mini">${SUN}</div>
+      <div><div class="hello">${t(40)}</div><div class="dash-date">${fmtLong(d)}</div></div>
+      <span class="syncpill">${pillHTML()}</span>
+    </div>
+    ${banner}${soonCard}
+    <div class="acts">
+      <button class="act att" id="goAtt">
+        <span class="ico"><i data-lucide="clipboard-check"></i></span>
+        <span class="tx"><b>${t(49)}</b><small>${t(50)}</small></span>
+        <i data-lucide="chevron-right" class="chev"></i>
+      </button>
+      <button class="act rec" id="goRec">
+        <span class="ico"><i data-lucide="bar-chart-3"></i></span>
+        <span class="tx"><b>${t(152)}</b><small>${t(153)}</small></span>
+        <i data-lucide="chevron-right" class="chev"></i>
+      </button>
+      <button class="act kids" id="goKids">
+        <span class="ico"><i data-lucide="users"></i></span>
+        <span class="tx"><b>${t(51)}</b><small>${t(52)}</small></span>
+        <i data-lucide="chevron-right" class="chev"></i>
+      </button>
+    </div>
+    <h3 class="sec">${t(53)}</h3>
+    <div class="dgrid">${SECTIONS.map(s=>{const c=kidsIn(s.n).length;
+      return '<button class="secbox" style="--c:'+s.hex+'" data-kids="'+s.n+'">'+
+      '<span class="num">'+s.n+'</span>'+
+      '<span class="agelab">'+s.ages+'</span>'+
+      '<span class="kcount">'+t(c===1?12:13,{n:c})+'</span></button>';}).join('')}</div>
+    <div class="dfoot">
+      <button class="quiet" id="goSet"><i data-lucide="settings"></i>${t(7)}</button>
+      <button class="quiet" id="goOut"><i data-lucide="log-out"></i>${t(8)}</button>
+    </div>
+  </div>`;
+  icons();
+  if(todays.length&&bdayFired!==todayStr()){bdayFired=todayStr();setTimeout(confetti,500);}
+  $('#goAtt').onclick=()=>go('sections');
+  $('#goRec').onclick=()=>go('records');
+  $('#goKids').onclick=()=>go('kids',{filter:0});
+  $('#goSet').onclick=()=>go('settings');
+  $('#goOut').onclick=()=>{ssDel('bmw_auth');ssDel('bmw_lang');lang='en';document.title=STRINGS.en[1];
+    document.body.classList.remove('am');document.documentElement.lang='en';go('login');};
+  const bb=$('#bdayB');if(bb)bb.onclick=confetti;
+  $$('[data-kids]').forEach(c=>c.onclick=()=>go('kids',{filter:+c.dataset.kids}));
+}
+
+function screenSections(){
+  const app=$('#app'),total=state.children.length;
+  app.innerHTML=`
+  <div class="screen">
+    ${topBar(t(49),'dashboard')}
+    <div class="att-sub">${t(55)}${total===0?' '+t(56):''}</div>
+    ${total===0?`<div class="empty"><i data-lucide="users"></i><b>${t(57)}</b>${t(58)}<br>
+      <button class="btn btn-yellow" id="toKids" style="margin-top:14px"><i data-lucide="user-plus"></i>${t(59)}</button></div>`:''}
+    <div class="sec-grid">
+    ${SECTIONS.map((s,i)=>{const c=kidsIn(s.n).length;
+      return '<button class="secbox" style="--c:'+s.hex+';--rot:'+(i%2?'3deg':'-3deg')+'" data-sec="'+s.n+'">'+
+        '<span class="num">'+s.n+'</span>'+
+        '<span class="agelab">'+t(10,{ages:s.ages})+'</span>'+
+        '<span class="kcount">'+(c===0?t(11):t(c===1?12:13,{n:c}))+'</span></button>';}).join('')}
+    </div>
+  </div>`;
+  icons();wireBack();
+  const tk=$('#toKids');if(tk)tk.onclick=()=>go('kids',{filter:0});
+  $$('[data-sec]').forEach(b=>b.onclick=()=>go('attendance',{section:+b.dataset.sec}));
+}
+
+function screenAttendance(){
+  const app=$('#app'),sec=route.params.section,S=SECTIONS[sec-1];
+  const wantDate=route.params.date||todayStr();
+  if(!attState||attState.section!==sec||attState.date!==wantDate){
+    attState={section:sec,date:wantDate,present:new Set(),existing:false};
+    loadAttRecord();}
+  const kids=kidsIn(sec);
+  const rows=kids.length?kids.map(k=>{
+    const on=attState.present.has(k.id);
+    const cake=isBdayToday(k)?'<i data-lucide="cake"></i>':'';
+    return '<div class="krow att'+(on?'':' off')+'" data-id="'+k.id+'" role="button" tabindex="0">'+
+      '<span class="kinfo"><b>'+esc(k.name)+cake+'</b><span>'+t(91,{n:calcAge(k.birthday),date:'',year:''}).split('·')[0].trim()+'</span></span>'+
+      '<span class="stbtn '+(on?'yes':'no')+'">'+(on?'<i data-lucide="check"></i>'+t(70):'<i data-lucide="x"></i>'+t(71))+'</span></div>';
+    }).join('')
+   :'<div class="empty"><i data-lucide="users"></i><b>'+t(67)+'</b>'+t(68)+'<br>'+
+    '<button class="btn btn-yellow" id="attAdd" style="margin-top:14px"><i data-lucide="user-plus"></i>'+t(69)+'</button></div>';
+  app.innerHTML=`
+  <div class="screen">
+    ${topBar('<span class="sec-pill" style="background:'+S.hex+'">'+t(60,{n:sec,ages:S.ages})+'</span>',route.params.back||'sections')}
+    <div class="att-sub">${kids.length===1?t(61,{n:1}):t(62,{n:kids.length})}</div>
+    <div class="date-row"><span class="dlab">${t(63)}</span><input class="input" type="date" id="attDate" value="${attState.date}" max="${todayStr()}"></div>
+    ${attState.existing?'<div class="note"><i data-lucide="info"></i><span>'+t(64)+'</span></div>':''}
+    ${kids.length?`<div class="tools">
+      <button class="btn sm" id="markAll"><i data-lucide="check-check"></i>${t(65)}</button>
+      <button class="btn sm" id="clearAll"><i data-lucide="undo-2"></i>${t(66)}</button>
+    </div>`:''}
+    <div class="att-list">${rows}</div>
+  </div>
+  ${kids.length?`<div class="att-bar">
+    <div class="counts"><b id="pc">0</b> ${t(72)}&nbsp;·&nbsp;<b id="ac">0</b> ${t(73)}</div>
+    <button class="btn btn-yellow" id="attSave"><i data-lucide="save"></i>${t(74)}</button>
+  </div>`:''}`;
+  icons();wireBack();updateCounts();
+  $('#attDate').onchange=e=>{attState.date=e.target.value||todayStr();route.params.date=attState.date;loadAttRecord();screenAttendance();};
+  const ma=$('#markAll');if(ma)ma.onclick=()=>{kidsIn(sec).forEach(k=>attState.present.add(k.id));screenAttendance();};
+  const ca=$('#clearAll');if(ca)ca.onclick=()=>{attState.present.clear();screenAttendance();};
+  const aa=$('#attAdd');if(aa)aa.onclick=()=>go('kids',{filter:sec});
+  $$('.krow.att').forEach(r=>{
+    r.addEventListener('click',()=>toggleKid(r));
+    r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleKid(r);}});});
+  const sv=$('#attSave');if(sv)sv.onclick=saveAttendance;
+}
+function loadAttRecord(){
+  const rec=state.attendance[attState.date+'|'+attState.section];
+  attState.present=new Set(rec&&Array.isArray(rec.present)?rec.present:[]);
+  attState.existing=!!rec;}
+function updateCounts(){
+  const t=kidsIn(attState.section).length;
+  $('#pc').textContent=attState.present.size;
+  $('#ac').textContent=t-attState.present.size;}
+function toggleKid(row){
+  const id=row.dataset.id,on=attState.present.has(id);
+  if(on)attState.present.delete(id);else attState.present.add(id);
+  row.classList.toggle('off',on);
+  const st=row.querySelector('.stbtn');
+  st.className='stbtn '+(on?'no':'yes');
+  st.innerHTML=on?'<i data-lucide="x"></i>'+t(71):'<i data-lucide="check"></i>'+t(70);
+  icons();updateCounts();}
+async function saveAttendance(){
+  state.attendance[attState.date+'|'+attState.section]={present:[...attState.present],savedAt:new Date().toISOString()};
+  attState.existing=true;
+  cacheState();
+  const r=await persist();
+  confetti();
+  if(r==='err')toast(t(76),'info');
+  else toast(t(75));
+  if(!$('.note')){
+    const div=document.createElement('div');div.className='note';
+    div.innerHTML='<i data-lucide="info"></i><span>'+t(77)+'</span>';
+    const tools=$('.tools');if(tools)tools.parentNode.insertBefore(div,tools);icons();}}
+
+/* ---------- records & charts screen ---------- */
+function screenRecords(){
+  const app=$('#app');
+  const dates=allRecordDates();
+  let inner='';
+  if(dates.length===0){
+    inner='<div class="empty"><i data-lucide="bar-chart-3"></i><b>'+t(156)+'</b>'+t(157)+'<br>'+
+      '<button class="btn btn-yellow" id="recGo" style="margin-top:14px"><i data-lucide="clipboard-check"></i>'+t(158)+'</button></div>';
+  }else{
+    /* --- Sundays bar chart, oldest on the left → newest on the right --- */
+    const sundays=lastSundays(8).reverse().map(d=>{const ds=dateKeyOf(d);const a=attForDate(ds);return{d,ds,total:a.total,has:a.has};});
+    const W=540,baseline=160,n=sundays.length,gap=10,pad=12;
+    const bw=(W-pad*2-gap*(n-1))/n;
+    const maxV=Math.max(1,...sundays.map(s=>s.total));
+    let bars='';
+    sundays.forEach((s,i)=>{
+      const x=+(pad+i*(bw+gap)).toFixed(1),cx=+(x+bw/2).toFixed(1);
+      const lab=s.d.getDate()+' '+MONTHS[lang][s.d.getMonth()];
+      if(s.has){
+        const bh=Math.max(8,Math.round(s.total/maxV*128));
+        const y=baseline-bh;
+        bars+='<rect x="'+x+'" y="'+y+'" width="'+bw.toFixed(1)+'" height="'+bh+'" rx="9" fill="var(--teal)" stroke="var(--ink)" stroke-width="3"/>'+
+          '<text x="'+cx+'" y="'+(y-9)+'" text-anchor="middle" class="cval">'+s.total+'</text>'+
+          '<text x="'+cx+'" y="184" text-anchor="middle" class="clab">'+lab+'</text>';
+      }else{
+        bars+='<rect x="'+x+'" y="132" width="'+bw.toFixed(1)+'" height="26" rx="9" fill="none" stroke="var(--ink2)" stroke-width="2.5" stroke-dasharray="7 6" opacity=".55"/>'+
+          '<text x="'+cx+'" y="150" text-anchor="middle" class="cval" style="fill:var(--ink2)">–</text>'+
+          '<text x="'+cx+'" y="184" text-anchor="middle" class="clab">'+lab+'</text>';
+      }});
+    const chart='<div class="card"><div class="chart-h"><i data-lucide="sun"></i>'+t(154)+'</div>'+
+      '<svg class="barchart" viewBox="0 0 540 196" role="img" aria-label="'+t(154)+'">'+
+      '<line x1="6" y1="160" x2="534" y2="160" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>'+
+      bars+'</svg></div>';
+
+    /* --- per-section comparison: newest recorded Sunday vs the one before --- */
+    const withRec=sundays.filter(s=>s.has);
+    let secCard='';
+    if(withRec.length){
+      const latest=withRec[withRec.length-1];
+      const prev=withRec[withRec.length-2]||null;
+      const cur=attForDate(latest.ds).per;
+      const pv=prev?attForDate(prev.ds).per:null;
+      const maxC=Math.max(1,...SECTIONS.map(s=>cur[s.n]));
+      const rows=SECTIONS.map(s=>{
+        const c=cur[s.n];let tr='<span class="trend flat">—</span>';
+        if(pv){const d=c-pv[s.n];
+          if(d>0)tr='<span class="trend up">▲ '+d+'</span>';
+          else if(d<0)tr='<span class="trend down">▼ '+(-d)+'</span>';
+          else tr='<span class="trend flat">=</span>';}
+        return '<div class="secrow2">'+
+          '<span class="sec-tag" style="--c:'+s.hex+'">S'+s.n+'</span>'+
+          '<div class="sbar" style="--c:'+s.hex+'"><i style="width:'+Math.round(c/maxC*100)+'%"></i></div>'+
+          '<b class="cnum">'+c+'</b>'+tr+'</div>';}).join('');
+      secCard='<div class="card"><div class="chart-h"><i data-lucide="users"></i>'+t(155,{date:fmtD(latest.ds)})+'</div>'+rows+'</div>';
+    }
+
+    /* --- full history, newest first --- */
+    const thisYear=new Date().getFullYear();
+    const hist=dates.map(ds=>{
+      const a=attForDate(ds);
+      const d=parseDS(ds);
+      const yr=d.getFullYear()!==thisYear?(' '+d.getFullYear()):'';
+      const rows=SECTIONS.filter(s=>Object.prototype.hasOwnProperty.call(state.attendance,ds+'|'+s.n)).map(s=>{
+        const c=a.per[s.n];
+        return '<button class="rrow" data-ds="'+ds+'" data-sec="'+s.n+'">'+
+          '<span class="sc" style="--c:'+s.hex+'">'+s.n+'</span>'+
+          '<b>'+t(9,{n:s.n})+'</b>'+
+          '<span class="cnt">'+t(160,{n:c})+'</span></button>';}).join('');
+      return '<div class="rcard"><div class="rdate"><i data-lucide="calendar-days"></i>'+fmtLong(d)+yr+
+        '<span class="rtot">'+t(160,{n:a.total})+'</span></div>'+rows+'</div>';}).join('');
+    inner=chart+secCard+'<h3 class="sec">'+t(159)+'</h3><p class="hint">'+t(161)+'</p>'+hist;
+  }
+  app.innerHTML='<div class="screen">'+topBar(t(152),'dashboard')+
+    (dates.length?'<div class="att-sub">'+t(153)+'</div>':'')+inner+'</div>';
+  icons();wireBack();
+  const rg=$('#recGo');if(rg)rg.onclick=()=>go('sections');
+  $$('[data-ds]').forEach(b=>b.onclick=()=>go('attendance',{section:+b.dataset.sec,date:b.dataset.ds,back:'records'}));
+}
+
+function kidRow(k){
+  const age=calcAge(k.birthday),sn=sectionForAge(age),S=SECTIONS[sn-1];
+  const cake=isBdayToday(k)?'<i data-lucide="cake"></i>':'';
+  const moved=recentlyMoved(k)?'<span class="badge-up"><i data-lucide="arrow-up"></i>'+t(94)+'</span>':'';
+  const meta=[k.gender?(t(92,{gender:genderLabel(k.gender)})):null,
+              k.phone?(t(93,{phone:esc(k.phone)})):null].filter(Boolean).join(' · ');
+  return '<div class="krow" data-name="'+esc(k.name).toLowerCase()+'">'+
+    '<span class="kinfo"><b>'+esc(k.name)+cake+'</b><span>'+t(91,{n:age,date:fmtD(k.birthday),year:k.birthday.slice(0,4)})+'</span>'+
+    (meta?'<span class="kmeta">'+meta+'</span>':'')+
+    moved+'</span>'+
+    '<span class="sec-tag" style="--c:'+S.hex+'">S'+sn+'</span>'+
+    (k.phone?'<a class="iconbtn" href="tel:'+esc(k.phone)+'" aria-label="'+t(95)+'"><i data-lucide="phone"></i></a>':'')+
+    '<button class="iconbtn" data-edit="'+k.id+'" aria-label="'+t(17)+'"><i data-lucide="pencil"></i></button>'+
+    '<button class="iconbtn" data-del="'+k.id+'" aria-label="'+t(18)+'"><i data-lucide="trash-2"></i></button></div>';}
+
+function screenKids(){
+  const app=$('#app'),filter=route.params.filter||0,total=state.children.length;
+  let list=filter?kidsIn(filter):[...state.children].sort(byName);
+  if(kidsQ){const q=kidsQ.toLowerCase();list=list.filter(k=>k.name.toLowerCase().includes(q));}
+  const emptyAll='<div class="empty"><i data-lucide="users"></i><b>'+t(83)+'</b>'+t(84)+'<br>'+
+    '<button class="btn btn-yellow" id="emptyAdd" style="margin-top:14px"><i data-lucide="user-plus"></i>'+t(85)+'</button>'+
+    '<div><button class="quiet" id="emptySample" style="margin-top:10px"><i data-lucide="sparkles"></i>'+t(86,{n:SAMPLE.length})+'</button></div></div>';
+  const emptyFilter='<div class="empty"><i data-lucide="users"></i><b>'+t(87,{n:filter})+'</b>'+t(88)+'</div>';
+  app.innerHTML=`
+  <div class="screen">
+    ${topBar(t(78)+' <span class="tcount">'+t(79,{n:total})+'</span>','dashboard')}
+    <div class="search"><i data-lucide="search"></i><input class="input" id="kSearch" placeholder="${t(80)}" value="${esc(kidsQ)}"></div>
+    <div class="chips">
+      <button class="chip${filter===0?' on':''}" data-f="0" style="--c:var(--yellow)">${t(81)}</button>
+      ${SECTIONS.map(s=>'<button class="chip'+(filter===s.n?' on':'')+'" data-f="'+s.n+'" style="--c:'+s.hex+'"><i class="dot"></i>S'+s.n+' · '+s.ages+'</button>').join('')}
+    </div>
+    <button class="btn btn-yellow full add-row" id="addKid"><i data-lucide="user-plus"></i>${t(82)}</button>
+    ${list.length?'<div class="klist">'+list.map(kidRow).join('')+'</div><div class="no-res" id="noRes">'+t(89)+'</div>':(total===0?emptyAll:emptyFilter)}
+    <p class="hint">${t(90)}</p>
+  </div>`;
+  icons();
+  if(list.length)applySearch();
+  wireBack();
+  $('#kSearch').oninput=e=>{kidsQ=e.target.value;applySearch();};
+  $$('.chip').forEach(c=>c.onclick=()=>{route.params.filter=+c.dataset.f;screenKids();});
+  $('#addKid').onclick=()=>openKidForm(null);
+  $$('[data-edit]').forEach(b=>b.onclick=()=>openKidForm(b.dataset.edit));
+  $$('[data-del]').forEach(b=>b.onclick=()=>openDelete(b.dataset.del));
+  const ea=$('#emptyAdd');if(ea)ea.onclick=()=>openKidForm(null);
+  const es=$('#emptySample');if(es)es.onclick=loadSample;
+}
+function applySearch(){
+  const q=kidsQ.trim().toLowerCase();let vis=0;
+  $$('.klist .krow').forEach(r=>{const hit=!q||r.dataset.name.includes(q);
+    r.style.display=hit?'':'none';if(hit)vis++;});
+  const nr=$('#noRes');if(nr)nr.style.display=vis?'none':'block';}
+
+function openKidForm(id){
+  const k=id?state.children.find(x=>x.id===id):null;
+  openModal(`
+    <h2>${k?t(97):t(98)}</h2>
+    <label class="lab" for="fName">${t(99)}</label>
+    <input class="input" id="fName" maxlength="60" placeholder="${t(100)}" value="${k?esc(k.name):''}">
+    <label class="lab" for="fGender">${t(101)}</label>
+    <select class="input" id="fGender">
+      <option value=""${k&&!k.gender?' selected':''}>${t(102)}</option>
+      <option value="male"${k&&k.gender==='male'?' selected':''}>${t(103)}</option>
+      <option value="female"${k&&k.gender==='female'?' selected':''}>${t(104)}</option>
+    </select>
+    <label class="lab" for="fBd">${t(105)}</label>
+    <input class="input" type="date" id="fBd" value="${k?k.birthday:''}" max="${todayStr()}">
+    <label class="lab" for="fPhone">${t(106)}</label>
+    <input class="input" id="fPhone" type="tel" inputmode="tel" maxlength="20" placeholder="${t(107)}" value="${k?esc(k.phone||''):''}">
+    <div class="prev" id="fPrev"></div>
+    <div class="mrow">
+      <button class="btn" id="fCancel">${t(111)}</button>
+      <button class="btn btn-green" id="fSave"><i data-lucide="check"></i>${k?t(112):t(113)}</button>
+    </div>`);
+  const bd=$('#fBd'),nm=$('#fName');
+  const upd=()=>{
+    const p=$('#fPrev');
+    if(!bd.value){p.innerHTML='<span class="prev-note">'+t(108)+'</span>';return;}
+    const a=calcAge(bd.value),s=sectionForAge(a),S=SECTIONS[s-1];
+    p.innerHTML='<span class="prev-pill" style="background:'+S.hex+'">'+t(109,{age:a,sec:s})+'</span>'+
+      (a<4?'<div class="prev-note">'+t(110)+'</div>':'');};
+  upd();bd.oninput=upd;bd.onchange=upd;
+  $('#fCancel').onclick=closeModal;
+  $('#fSave').onclick=()=>{
+    const name=nm.value.trim();
+    if(!name){toast(t(114),'info');nm.focus();return;}
+    if(!bd.value){toast(t(115),'info');bd.focus();return;}
+    if(k){k.name=name;k.birthday=bd.value;
+      k.gender=$('#fGender').value;k.phone=$('#fPhone').value.trim();}
+    else state.children.push({id:uid(),name,birthday:bd.value,
+      gender:$('#fGender').value,phone:$('#fPhone').value.trim()});
+    closeModal();
+    persist().then(r=>{toast(r==='err'?t(117):t(116));screenKids();});};
+  setTimeout(()=>{try{nm.focus();}catch(e){}},250);}
+function openDelete(id){
+  const k=state.children.find(x=>x.id===id);if(!k)return;
+  openModal(`
+    <h2>${t(118,{name:esc(k.name)})}</h2>
+    <p>${t(119)}</p>
+    <div class="mrow">
+      <button class="btn" id="dCancel">${t(120)}</button>
+      <button class="btn btn-red" id="dOk"><i data-lucide="trash-2"></i>${t(121)}</button>
+    </div>`);
+  $('#dCancel').onclick=closeModal;
+  $('#dOk').onclick=()=>{
+    state.children=state.children.filter(x=>x.id!==id);
+    closeModal();persist();toast(t(122));screenKids();};}
+
+/* ================= settings ================= */
+function stCardHTML(){
+  if(sync==='loading')
+    return '<div class="st-line"><i data-lucide="refresh-cw"></i>'+t(123)+'</div>';
+  if(sync==='error')
+    return '<div class="st-line"><i data-lucide="wifi-off"></i>'+t(124)+'</div>';
+  return '<div class="st-line"><i data-lucide="cloud"></i>'+(lastSync?t(125,{time:lastSync}):t(125,{time:'—'}))+'</div>';}
+function updateSettingsStatus(){const el=$('#stCard');if(el){el.innerHTML=stCardHTML();icons();}}
+
+function screenSettings(){
+  const app=$('#app');
+  app.innerHTML=`
+  <div class="screen">
+    ${topBar(t(7),'dashboard')}
+    <div class="card" id="stCard">${stCardHTML()}</div>
+    <h3 class="sec">ቋንቋ · Language</h3>
+    <div class="chips">
+      <button class="chip${lang==='en'?' on':''}" id="langEn" style="--c:var(--yellow)">English</button>
+      <button class="chip${lang==='am'?' on':''}" id="langAm" style="--c:var(--teal)">አማርኛ</button>
+    </div>
+    <h3 class="sec">${t(126)}</h3>
+    <p class="hint">${t(127)}</p>
+    <div class="mrow col">
+      <button class="btn btn-yellow" id="pullNow"><i data-lucide="refresh-cw"></i>${t(128)}</button>
+    </div>
+    <div class="binid">${t(129,{id:esc(JSONBIN.binId)})}</div>
+    <details>
+      <summary>${t(130)}</summary>
+      <ol>
+        <li>${t(131)}</li>
+        <li>${t(132)}</li>
+        <li>${t(133)}</li>
+      </ol>
+    </details>
+    <h3 class="sec">${t(134)}</h3>
+    <p class="hint">${t(135)}</p>
+    <div class="mrow col">
+      <button class="btn" id="loadSample"><i data-lucide="sparkles"></i>${t(96,{n:SAMPLE.length})}</button>
+      <button class="btn" id="clearSample"><i data-lucide="x"></i>${t(136)}</button>
+    </div>
+  </div>`;
+  icons();wireBack();
+  $('#langEn').onclick=()=>{setLang('en');screenSettings();};
+  $('#langAm').onclick=()=>{setLang('am');screenSettings();};
+  $('#pullNow').onclick=pullNow;
+  $('#loadSample').onclick=loadSample;
+  $('#clearSample').onclick=async()=>{
+    const before=state.children.length;
+    state.children=state.children.filter(k=>!k.sample);
+    if(before===state.children.length){toast(t(139),'info');return;}
+    await persist();toast(t(140));screenSettings();};}
+
+function explainBinError(e){
+  if(e&&e.name==='AbortError')return t(148);
+  if(e&&(e.status===401||e.status===403))return t(149);
+  if(e&&(e.status===404||e.status===422))return t(150);
+  return t(151);}
+async function pullNow(){
+  const btn=$('#pullNow');btn.disabled=true;btn.style.opacity=.6;
+  sync='loading';updateSyncPills();
+  try{
+    const rec=await getBin();
+    const remoteKids=sanitizeKids(rec&&rec.children);
+    const remoteAtt=(rec&&rec.attendance&&typeof rec.attendance==='object')?rec.attendance:{};
+    state={children:mergeChildren(state.children,remoteKids),
+           attendance:mergeAttendance(state.attendance,remoteAtt)};
+    cacheState();
+    toast(remoteKids.length?t(137,{n:remoteKids.length}):t(138),'check');
+    /* push any local-only records back up so nothing is lost */
+    try{await putBin();}catch(e){}
+    sync='saved';lastSync=fmtTime(new Date());
+  }catch(e){sync='error';toast(explainBinError(e),'info');}
+  updateSyncPills();updateSettingsStatus();
+  btn.disabled=false;btn.style.opacity=1;
+  refreshSafeScreens();}
+
+async function loadSample(){
+  if(state.children.some(k=>k.sample)){toast(t(139),'info');return;}
+  SAMPLE.forEach(([n,a,o])=>state.children.push({id:uid(),name:n,birthday:sampleBirthday(a,o),sample:true}));
+  const r=await persist();
+  toast(r==='err'?t(142):t(141,{n:SAMPLE.length}));
+  refreshSafeScreens();}
+
+/* ================= boot ================= */
+const screens={login:screenLogin,langpick:screenLang,dashboard:screenDashboard,
+  sections:screenSections,attendance:screenAttendance,records:screenRecords,
+  kids:screenKids,settings:screenSettings};
+
+/* Startup pull now MERGES with the phone's data instead of replacing it:
+   - attendance: newest savedAt wins per record
+   - kids: combined by id; anything that existed only on this phone is kept
+   - if the merge produced things the cloud doesn't have, upload them right away */
+async function backgroundSync(){
+  sync='loading';updateSyncPills();
+  try{
+    const rec=await getBin();
+    const remoteKids=sanitizeKids(rec&&rec.children);
+    const remoteAtt=(rec&&rec.attendance&&typeof rec.attendance==='object')?rec.attendance:{};
+    const mergedKids=mergeChildren(state.children,remoteKids);
+    const mergedAtt=mergeAttendance(state.attendance,remoteAtt);
+    const needsPush=mergedKids.length!==remoteKids.length||
+                    Object.keys(mergedAtt).length!==Object.keys(remoteAtt).length;
+    state={children:mergedKids,attendance:mergedAtt};
+    cacheState();
+    if(needsPush){try{await putBin();}catch(e){}}
+    sync='saved';lastSync=fmtTime(new Date());
+  }catch(e){sync='error';}
+  updateSyncPills();updateSettingsStatus();
+  refreshSafeScreens();}
+
+function boot(){
+  try{
+    const d=JSON.parse(lsGet(LS_DATA)||'null');
+    if(d&&Array.isArray(d.children)){
+      const clean=sanitizeKids(d.children);
+      if(clean.length||d.attendance)state={children:clean,
+        attendance:(d.attendance&&typeof d.attendance==='object')?d.attendance:{}};
+    }
+  }catch(e){}
+  const authed=ssGet('bmw_auth')==='1';
+  const savedLang=ssGet('bmw_lang');
+  if(authed&&savedLang)setLang(savedLang);
+  go(authed?(savedLang?'dashboard':'langpick'):'login');
+  backgroundSync();
+}
+boot();
+</script>
+</body>
+</html>
