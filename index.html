@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#FFC531">
-<title>Bulbula Mulu Wengel Kids Management System</title>
+<title>Bulbula Mulu Wengel No 1 Kids Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+Ethiopic:wght@500;700;800&display=swap" rel="stylesheet">
@@ -303,7 +303,8 @@ details li{margin-bottom:6px}
 
 <script>
 'use strict';
-/* v7 — attendance sync fix: merge instead of overwrite, chart oldest→newest */
+/* v8 — deletions now sync via tombstones (Remove works everywhere),
+   kid edits carry updatedAt so they win over the cloud, "No 1" title */
 /* ================= JSONBin — already connected ================= */
 const JSONBIN={
   binId:'68dbdee5ae596e708f013aad',
@@ -314,15 +315,15 @@ const JSONBIN={
 /* ================= translations (English + Amharic) ================= */
 const STRINGS={
 en:{
- 1:'Bulbula Mulu Wengel Kids Management System',
+ 1:'Bulbula Mulu Wengel No 1 Kids Management System',
  2:'Syncing…',3:'Saving…',4:'Offline copy',5:'Synced',6:'Synced {time}',
  7:'Settings',8:'Log out',9:'Section {n}',10:'Ages {ages}',11:'Empty',
  12:'{n} kid',13:'{n} kids',14:'kid',15:'kids',16:'Back',17:'Edit',18:'Delete',
  19:'Jan',20:'Feb',21:'Mar',22:'Apr',23:'May',24:'Jun',25:'Jul',26:'Aug',27:'Sep',28:'Oct',29:'Nov',30:'Dec',
- 31:'Bulbula Mulu Wengel',32:'Kids Management System',33:'Sunday School',
+ 31:'Bulbula Mulu Wengel No 1',32:'Kids Management System',33:'Sunday School',
  34:'Enter the password',35:'Show password',36:'Enter',
  37:'That password is not right — please try again.',38:'Welcome, Teacher!',
- 39:'For Sunday school teachers · Bulbula Mulu Wengel',
+ 39:'For Sunday school teachers · Bulbula Mulu Wengel No 1',
  40:'Hello, Teacher!',41:'Happy birthday, {name}!',42:'& more',
  43:'Turning {age} today — tap for confetti!',
  44:'Birthdays coming up',
@@ -393,15 +394,15 @@ en:{
  161:'Tap a class to open that day'
 },
 am:{
- 1:'ቡልቡላ ሙሉ ወንጌል የልጆች አስተዳደር ስርዓት',
+ 1:'ቡልቡልላ ሙሉ ወንጌል ቁጥር 1 የልጆች አስተዳደር ስርዓት',
  2:'በማመሳሰል ላይ…',3:'በማስቀመጥ ላይ…',4:'ከመስመር ውጭ ያለ ቅጂ',5:'ተመሳስሏል',6:'በ{time} ተመሳስሏል',
  7:'ቅንብሮች',8:'ውጣ',9:'ክፍል {n}',10:'እድሜ {ages}',11:'ባዶ',
  12:'{n} ልጅ',13:'{n} ልጆች',14:'ልጅ',15:'ልጆች',16:'ተመለስ',17:'አርትዕ',18:'ሰርዝ',
  19:'ጥር',20:'የካቲት',21:'መጋቢት',22:'ሚያዝያ',23:'ግንቦት',24:'ሰኔ',25:'ሐምሌ',26:'ነሐሴ',27:'መስከረም',28:'ጥቅምት',29:'ኅዳር',30:'ታህሳስ',
- 31:'ቡልቡላ ሙሉ ወንጌል',32:'የልጆች አስተዳደር ስርዓት',33:'ሰንበት ትምህርት ቤት',
+ 31:'ቡልቡልላ ሙሉ ወንጌል ቁጥር 1',32:'የልጆች አስተዳደር ስርዓት',33:'ሰንበት ትምህርት ቤት',
  34:'የይለፍ ቃል ያስገቡ',35:'የይለፍ ቃሉን አሳይ',36:'ግባ',
  37:'የይለፍ ቃሉ ትክክለኛ አይደለም — እባክዎ እንደገና ይሞክሩ።',38:'እንኳን ደህና መጡ፣ መምህር!',
- 39:'ለሰንበት ትምህርት መምህራን · ቡልቡላ ሙሉ ወንጌል',
+ 39:'ለሰንበት ትምህርት መምህራን · ቡልቡልላ ሙሉ ወንጌል ቁጥር 1',
  40:'ሰላም፣ መምህር!',41:'መልካም የልደት ቀን፣ {name}!',42:'እና ሌሎችም',
  43:'ዛሬ {age} ዓመት ሞላ/ች — ለኮንፌቲ ይንኩ!',
  44:'የሚመጡ የልደት ቀናት',
@@ -491,7 +492,7 @@ const SAMPLE=[
   ['Mikias Haile',13,20],['Tigist Fikru',13,100],
   ['Yared Tessema',14,5],['Bereket Solomon',15,30],['Eden Mulugeta',16,75],
 ];
-let state={children:[],attendance:{}};
+let state={children:[],attendance:{},deletions:{}};
 let lang='en';
 let sync='none', lastSync=null;
 let route={screen:'login',params:{}};
@@ -595,8 +596,13 @@ function allRecordDates(){
   for(const k in state.attendance)seen[k.slice(0,k.indexOf('|'))]=1;
   return Object.keys(seen).sort().reverse();}
 
-/* ---- MERGE helpers: never lose data when phone and cloud disagree ---- */
+/* ---- MERGE helpers ----
+   Attendance: newest savedAt wins per record.
+   Kids: newest updatedAt wins per kid.
+   Deletions ("tombstones"): once a kid is removed, their id stays
+   excluded on every device — this is what makes Remove actually work. */
 function attTime(rec){return rec&&typeof rec.savedAt==='string'?rec.savedAt:'';}
+function kidTime(k){return k&&typeof k.updatedAt==='string'?k.updatedAt:'';}
 function mergeAttendance(local,remote){
   const out=Object.assign({},local||{});
   const rem=remote||{};
@@ -606,10 +612,25 @@ function mergeAttendance(local,remote){
     if(!r)continue;
     out[k]=(attTime(r)>attTime(l))?r:l;}
   return out;}
-function mergeChildren(local,remote){
+function sanitizeDels(o){
+  const out={};
+  if(o&&typeof o==='object'){
+    for(const k in o){
+      if(typeof k==='string'&&k&&typeof o[k]==='string')out[k]=o[k];}}
+  return out;}
+function mergeDels(a,b){
+  const out=Object.assign({},a||{});
+  Object.keys(b||{}).forEach(k=>{
+    if(!out[k]||(b[k]>out[k]))out[k]=b[k];});
+  return out;}
+function mergeChildren(local,remote,dels){
+  dels=dels||{};
   const map={};
-  (remote||[]).forEach(k=>{if(k&&k.id)map[k.id]=k;});
-  (local||[]).forEach(k=>{if(k&&k.id&&!map[k.id])map[k.id]=k;});
+  (remote||[]).forEach(k=>{if(k&&k.id&&!dels[k.id])map[k.id]=k;});
+  (local||[]).forEach(k=>{
+    if(!k||!k.id||dels[k.id])return;
+    const r=map[k.id];
+    if(!r||kidTime(k)>=kidTime(r))map[k.id]=k;});
   return Object.values(map).sort(byName);}
 
 function sanitizeKids(arr){
@@ -621,6 +642,7 @@ function sanitizeKids(arr){
         name:k.name.trim().slice(0,60),birthday:k.birthday,
         gender:(typeof k.gender==='string'&&k.gender)?k.gender:'',
         phone:(typeof k.phone==='string'&&k.phone)?k.phone:'',
+        updatedAt:(typeof k.updatedAt==='string')?k.updatedAt:'',
         sample:!!k.sample});
     }});
   return out;}
@@ -650,21 +672,24 @@ async function getBin(){
 async function putBin(){
   const r=await fetchT('https://api.jsonbin.io/v3/b/'+JSONBIN.binId,{method:'PUT',
     headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN.masterKey,'X-Bin-Versioning':'false'},
-    body:JSON.stringify({children:state.children,attendance:state.attendance})});
+    body:JSON.stringify({children:state.children,attendance:state.attendance,deletions:state.deletions})});
   if(!r.ok)throw httpErr(r.status);}
 /* Save = read cloud → merge → write merged blob. Nothing can be erased by a save. */
 async function persist(){
   cacheState();
   sync='saving';updateSyncPills();
   try{
-    let remoteKids=[],remoteAtt={};
+    let remoteKids=[],remoteAtt={},remoteDels={};
     try{
       const rec=await getBin();
       remoteKids=sanitizeKids(rec&&rec.children);
       remoteAtt=(rec&&rec.attendance&&typeof rec.attendance==='object')?rec.attendance:{};
+      remoteDels=sanitizeDels(rec&&rec.deletions);
     }catch(e){/* offline: still upload what we have */}
-    state={children:mergeChildren(state.children,remoteKids),
-           attendance:mergeAttendance(state.attendance,remoteAtt)};
+    const dels=mergeDels(state.deletions,remoteDels);
+    state={children:mergeChildren(state.children,remoteKids,dels),
+           attendance:mergeAttendance(state.attendance,remoteAtt),
+           deletions:dels};
     cacheState();
     await putBin();
     sync='saved';lastSync=fmtTime(new Date());updateSyncPills();return 'ok';
@@ -1132,10 +1157,12 @@ function openKidForm(id){
     const name=nm.value.trim();
     if(!name){toast(t(114),'info');nm.focus();return;}
     if(!bd.value){toast(t(115),'info');bd.focus();return;}
+    const stamp=new Date().toISOString();
     if(k){k.name=name;k.birthday=bd.value;
-      k.gender=$('#fGender').value;k.phone=$('#fPhone').value.trim();}
+      k.gender=$('#fGender').value;k.phone=$('#fPhone').value.trim();
+      k.updatedAt=stamp;}
     else state.children.push({id:uid(),name,birthday:bd.value,
-      gender:$('#fGender').value,phone:$('#fPhone').value.trim()});
+      gender:$('#fGender').value,phone:$('#fPhone').value.trim(),updatedAt:stamp});
     closeModal();
     persist().then(r=>{toast(r==='err'?t(117):t(116));screenKids();});};
   setTimeout(()=>{try{nm.focus();}catch(e){}},250);}
@@ -1150,7 +1177,9 @@ function openDelete(id){
     </div>`);
   $('#dCancel').onclick=closeModal;
   $('#dOk').onclick=()=>{
+    /* tombstone the id so the sync merge never resurrects this kid */
     state.children=state.children.filter(x=>x.id!==id);
+    state.deletions[id]=new Date().toISOString();
     closeModal();persist();toast(t(122));screenKids();};}
 
 /* ================= settings ================= */
@@ -1200,9 +1229,11 @@ function screenSettings(){
   $('#pullNow').onclick=pullNow;
   $('#loadSample').onclick=loadSample;
   $('#clearSample').onclick=async()=>{
-    const before=state.children.length;
+    const removed=state.children.filter(k=>k.sample);
+    if(!removed.length){toast(t(139),'info');return;}
+    const stamp=new Date().toISOString();
     state.children=state.children.filter(k=>!k.sample);
-    if(before===state.children.length){toast(t(139),'info');return;}
+    removed.forEach(k=>{state.deletions[k.id]=stamp;});
     await persist();toast(t(140));screenSettings();};}
 
 function explainBinError(e){
@@ -1217,11 +1248,13 @@ async function pullNow(){
     const rec=await getBin();
     const remoteKids=sanitizeKids(rec&&rec.children);
     const remoteAtt=(rec&&rec.attendance&&typeof rec.attendance==='object')?rec.attendance:{};
-    state={children:mergeChildren(state.children,remoteKids),
-           attendance:mergeAttendance(state.attendance,remoteAtt)};
+    const remoteDels=sanitizeDels(rec&&rec.deletions);
+    const dels=mergeDels(state.deletions,remoteDels);
+    state={children:mergeChildren(state.children,remoteKids,dels),
+           attendance:mergeAttendance(state.attendance,remoteAtt),
+           deletions:dels};
     cacheState();
     toast(remoteKids.length?t(137,{n:remoteKids.length}):t(138),'check');
-    /* push any local-only records back up so nothing is lost */
     try{await putBin();}catch(e){}
     sync='saved';lastSync=fmtTime(new Date());
   }catch(e){sync='error';toast(explainBinError(e),'info');}
@@ -1231,7 +1264,8 @@ async function pullNow(){
 
 async function loadSample(){
   if(state.children.some(k=>k.sample)){toast(t(139),'info');return;}
-  SAMPLE.forEach(([n,a,o])=>state.children.push({id:uid(),name:n,birthday:sampleBirthday(a,o),sample:true}));
+  const stamp=new Date().toISOString();
+  SAMPLE.forEach(([n,a,o])=>state.children.push({id:uid(),name:n,birthday:sampleBirthday(a,o),sample:true,updatedAt:stamp}));
   const r=await persist();
   toast(r==='err'?t(142):t(141,{n:SAMPLE.length}));
   refreshSafeScreens();}
@@ -1241,23 +1275,25 @@ const screens={login:screenLogin,langpick:screenLang,dashboard:screenDashboard,
   sections:screenSections,attendance:screenAttendance,records:screenRecords,
   kids:screenKids,settings:screenSettings};
 
-/* Startup pull now MERGES with the phone's data instead of replacing it:
-   - attendance: newest savedAt wins per record
-   - kids: combined by id; anything that existed only on this phone is kept
-   - if the merge produced things the cloud doesn't have, upload them right away */
+/* Startup pull MERGES with the phone's data (never replaces it):
+   - attendance: newest savedAt wins
+   - kids: newest updatedAt wins; tombstoned ids stay deleted
+   - anything new on this phone is pushed up so all teachers share it */
 async function backgroundSync(){
   sync='loading';updateSyncPills();
   try{
     const rec=await getBin();
     const remoteKids=sanitizeKids(rec&&rec.children);
     const remoteAtt=(rec&&rec.attendance&&typeof rec.attendance==='object')?rec.attendance:{};
-    const mergedKids=mergeChildren(state.children,remoteKids);
+    const remoteDels=sanitizeDels(rec&&rec.deletions);
+    const dels=mergeDels(state.deletions,remoteDels);
+    const mergedKids=mergeChildren(state.children,remoteKids,dels);
     const mergedAtt=mergeAttendance(state.attendance,remoteAtt);
-    const needsPush=mergedKids.length!==remoteKids.length||
-                    Object.keys(mergedAtt).length!==Object.keys(remoteAtt).length;
-    state={children:mergedKids,attendance:mergedAtt};
+    const before=JSON.stringify({children:remoteKids,attendance:remoteAtt,deletions:remoteDels});
+    const after=JSON.stringify({children:mergedKids,attendance:mergedAtt,deletions:dels});
+    state={children:mergedKids,attendance:mergedAtt,deletions:dels};
     cacheState();
-    if(needsPush){try{await putBin();}catch(e){}}
+    if(before!==after){try{await putBin();}catch(e){}}
     sync='saved';lastSync=fmtTime(new Date());
   }catch(e){sync='error';}
   updateSyncPills();updateSettingsStatus();
@@ -1266,10 +1302,12 @@ async function backgroundSync(){
 function boot(){
   try{
     const d=JSON.parse(lsGet(LS_DATA)||'null');
-    if(d&&Array.isArray(d.children)){
+    if(d&&typeof d==='object'){
       const clean=sanitizeKids(d.children);
-      if(clean.length||d.attendance)state={children:clean,
-        attendance:(d.attendance&&typeof d.attendance==='object')?d.attendance:{}};
+      const att=(d.attendance&&typeof d.attendance==='object')?d.attendance:{};
+      const dels=sanitizeDels(d.deletions);
+      if(clean.length||Object.keys(att).length||Object.keys(dels).length)
+        state={children:clean,attendance:att,deletions:dels};
     }
   }catch(e){}
   const authed=ssGet('bmw_auth')==='1';
